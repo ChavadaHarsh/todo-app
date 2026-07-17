@@ -65,11 +65,21 @@ jobs:
         shell: bash
         env:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
         run: |
+          set -euo pipefail
+          test -n "$EC2_SSH_KEY"
+          test -n "$EC2_HOST"
           mkdir -p ~/.ssh
           printf '%s\n' "$EC2_SSH_KEY" > ~/.ssh/github_actions
           chmod 600 ~/.ssh/github_actions
-          ssh-keyscan -p "${{ secrets.EC2_PORT || '22' }}" "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+          touch ~/.ssh/known_hosts
+          cat <<'EOF' > ~/.ssh/config
+          Host *
+            IdentityFile ~/.ssh/github_actions
+            StrictHostKeyChecking accept-new
+          EOF
+          chmod 600 ~/.ssh/config
 
       - name: Deploy application
         shell: bash
