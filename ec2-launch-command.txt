@@ -1,0 +1,170 @@
+EC2 production setup for this Next.js app
+
+Project
+todo-app
+
+Domain
+todoapp.work.gd
+
+Server hostname
+nextjs-serve
+
+Elastic IP
+34.232.71.220
+
+EC2 user
+ubuntu
+
+App directory on server
+/home/ubuntu/todo-app
+
+App port
+3000
+
+1. Connect to the EC2 server
+ssh -i your-key.pem ubuntu@34.232.71.220
+
+2. Set the server hostname
+sudo hostnamectl set-hostname nextjs-serve
+hostnamectl
+
+3. Update the server
+sudo apt update && sudo apt upgrade -y
+
+4. Install Node.js 20, git, and nginx
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs git nginx
+
+5. Verify installed versions
+node -v
+npm -v
+git --version
+nginx -v
+
+6. Clone the project on the server
+cd /home/ubuntu
+git clone your-repo-url todo-app
+cd /home/ubuntu/todo-app
+
+7. Add environment file if required
+cp .env.example .env.local
+
+8. Install dependencies and build
+npm ci
+npm run build
+
+9. Start the app manually once
+nohup npm run start -- --hostname 0.0.0.0 --port 3000 > app.log 2>&1 &
+
+10. Check app status on the server
+ps -ef | grep node
+tail -f app.log
+curl http://127.0.0.1:3000
+
+11. Configure nginx reverse proxy
+sudo tee /etc/nginx/sites-available/todo-app > /dev/null <<'EOF'
+server {
+    listen 80;
+    server_name todoapp.work.gd www.todoapp.work.gd 34.232.71.220;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+EOF
+
+12. Enable nginx site
+sudo ln -sf /etc/nginx/sites-available/todo-app /etc/nginx/sites-enabled/todo-app
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t
+sudo systemctl restart nginx
+sudo systemctl enable nginx
+
+13. Open firewall if ufw is enabled
+sudo ufw allow OpenSSH
+sudo ufw allow 'Nginx Full'
+sudo ufw status
+
+14. AWS security group inbound rules
+SSH TCP 22 from your IP
+HTTP TCP 80 from 0.0.0.0/0
+HTTPS TCP 443 from 0.0.0.0/0
+
+15. DNS records for the domain
+Type A
+Host @
+Value 34.232.71.220
+
+Type A
+Host www
+Value 34.232.71.220
+
+16. Check domain after DNS update
+nslookup todoapp.work.gd
+ping todoapp.work.gd
+curl http://todoapp.work.gd
+
+17. Generate a dedicated SSH key pair for GitHub Actions on your local machine
+ssh-keygen -t ed25519 -C "github-actions@todoapp.work.gd" -f ./github-actions-ec2
+
+This creates:
+Private key: ./github-actions-ec2
+Public key: ./github-actions-ec2.pub
+
+18. Show the public key and copy it
+cat ./github-actions-ec2.pub
+
+19. Add the public key to the EC2 server
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+echo "paste-the-public-key-here" >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+
+Alternative from your local machine:
+type .\github-actions-ec2.pub | ssh -i your-key.pem ubuntu@34.232.71.220 "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
+
+20. Test the new GitHub Actions SSH key from your local machine
+ssh -i ./github-actions-ec2 ubuntu@34.232.71.220
+
+21. Add these GitHub repository secrets
+APP_DIR = /home/ubuntu/todo-app
+APP_PORT = 3000
+EC2_HOST = todoapp.work.gd
+EC2_PORT = 22
+EC2_USER = ubuntu
+EC2_SSH_KEY = entire contents of the private key file github-actions-ec2
+
+22. Show the private key content to paste into GitHub secret EC2_SSH_KEY
+cat ./github-actions-ec2
+
+23. After each push to main, GitHub Actions will run this deployment flow
+cd /home/ubuntu/todo-app
+git fetch --all --prune
+git checkout main
+git pull --ff-only origin main
+npm ci
+npm run build
+pkill -f "next start" || true
+nohup npm run start -- --hostname 0.0.0.0 --port 3000 > app.log 2>&1 &
+curl http://127.0.0.1:3000
+
+24. Useful maintenance commands on EC2
+cd /home/ubuntu/todo-app
+git status
+git log --oneline -5
+ps -ef | grep node
+pkill -f "next start"
+nohup npm run start -- --hostname 0.0.0.0 --port 3000 > app.log 2>&1 &
+tail -f app.log
+
+25. Recommended next production step
+Install SSL with Certbot after HTTP is working:
+sudo apt install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d todoapp.work.gd -d www.todoapp.work.gd

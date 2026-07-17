@@ -29,8 +29,31 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## GitHub CI/CD
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This repo includes a GitHub Actions workflow at `.github/workflows/ci-cd.yml`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+What it does:
+
+- Runs `npm ci`, `npm run lint`, and `npm run build` on every pull request to `main`
+- Deploys to your EC2 server on every push to `main`
+- Verifies the app is reachable on the EC2 instance after deployment
+
+Required GitHub Actions secrets:
+
+- `EC2_HOST`: your EC2 public IP or domain
+- `EC2_PORT`: SSH port, usually `22`
+- `EC2_USER`: SSH user, for example `ubuntu`
+- `EC2_SSH_KEY`: private SSH key used by GitHub Actions
+- `APP_DIR`: absolute path to the app on the server, for example `/home/ubuntu/todo-app`
+- `APP_PORT`: app port, for example `3000`
+
+Server expectations:
+
+- The repo is already cloned on the EC2 instance inside `APP_DIR`
+- Node.js 20 and npm are installed on the server
+- The server can run `npm ci` and `npm run build`
+- `.env.local` is already present on the server if your app needs environment variables
+- Port `3000` is either exposed or proxied through nginx
+
+For production, using nginx in front of `next start` is recommended for safer self-hosting and better request handling.
