@@ -23,6 +23,8 @@
 # misc
 .DS_Store
 *.pem
+github-actions-ec2
+github-actions-ec2.pub
 
 # debug
 npm-debug.log*
