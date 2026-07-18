@@ -33,7 +33,7 @@ jobs:
           script: |
             set -e
 
-            cd /app/todo-app
+            cd /home/ubuntu/app/todo-app
 
             git pull origin master
 
