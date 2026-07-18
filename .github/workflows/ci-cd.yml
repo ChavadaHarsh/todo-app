@@ -37,6 +37,10 @@ jobs:
         env:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
 
+      - name: Validate SSH key format
+        run: |
+          ssh-keygen -y -f "$GITHUB_WORKSPACE/ec2_deploy_key" > /dev/null
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.2.2
         with:
@@ -47,7 +51,7 @@ jobs:
           script: |
             set -e
 
-            cd /home/ubuntu/todo-app
+            cd /home/ubuntu/app/todo-app
 
             echo "Pull latest code..."
             git pull --ff-only origin master
