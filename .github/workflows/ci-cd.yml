@@ -30,12 +30,19 @@ jobs:
       - name: Build Application
         run: npm run build
 
+      - name: Write SSH key
+        run: |
+          printf '%s\n' "$EC2_SSH_KEY" > "$GITHUB_WORKSPACE/ec2_deploy_key"
+          chmod 600 "$GITHUB_WORKSPACE/ec2_deploy_key"
+        env:
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          key_path: ${{ github.workspace }}/ec2_deploy_key
           port: 22
           script: |
             set -e
@@ -43,7 +50,7 @@ jobs:
             cd /home/ubuntu/todo-app
 
             echo "Pull latest code..."
-            git pull origin master
+            git pull --ff-only origin master
 
             echo "Install dependencies..."
             npm ci
