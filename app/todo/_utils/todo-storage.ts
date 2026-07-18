@@ -1,6 +1,9 @@
 import type { TodoItem } from "../_types/todo";
 
-export const STORAGE_KEY = process.env.NEXT_PUBLIC_TODO_STORAGE_KEY ?? "";
+const DEFAULT_STORAGE_KEY = "todo-app-items";
+
+export const STORAGE_KEY =
+  process.env.NEXT_PUBLIC_TODO_STORAGE_KEY ?? DEFAULT_STORAGE_KEY;
 
 export function loadTodos(): TodoItem[] {
   if (typeof window === "undefined") {
