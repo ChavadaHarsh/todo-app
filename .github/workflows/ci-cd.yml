@@ -28,7 +28,7 @@ jobs:
         run: npm run lint
 
       - name: Build Application
-        run: npm run build
+        run: npm run build  
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.2.2
@@ -39,6 +39,12 @@ jobs:
           port: 22
           script: |
             set -e
+
+            if [ ! -d "/home/ubuntu/todo-app" ]; then
+              echo "Error: app folder does not exist: /home/ubuntu/todo-app"
+              echo "Fix: create the project folder on EC2 and clone/upload the app there."
+              exit 1
+            fi
 
             cd /home/ubuntu/todo-app
 
