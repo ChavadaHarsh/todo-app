@@ -16,6 +16,12 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+Create your local env file before running if you want a custom browser storage key:
+
+```bash
+cp .env.example .env.local
+```
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
@@ -55,5 +61,9 @@ Server expectations:
 - The server can run `npm ci` and `npm run build`
 - `.env.local` is already present on the server if your app needs environment variables
 - Port `3000` is either exposed or proxied through nginx
+
+Environment variable used by this app:
+
+- `NEXT_PUBLIC_TODO_STORAGE_KEY`: localStorage key for saved todos, for example `todo-app-items`
 
 For production, using nginx in front of `next start` is recommended for safer self-hosting and better request handling.
