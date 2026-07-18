@@ -13,10 +13,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
@@ -30,28 +30,17 @@ jobs:
       - name: Build Application
         run: npm run build
 
-      - name: Write SSH key
-        run: |
-          printf '%s\n' "$EC2_SSH_KEY" > "$GITHUB_WORKSPACE/ec2_deploy_key"
-          chmod 600 "$GITHUB_WORKSPACE/ec2_deploy_key"
-        env:
-          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-
-      - name: Validate SSH key format
-        run: |
-          ssh-keygen -y -f "$GITHUB_WORKSPACE/ec2_deploy_key" > /dev/null
-
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key_path: ${{ github.workspace }}/ec2_deploy_key
+          key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
             set -e
 
-            cd /home/ubuntu/app/todo-app
+            cd /home/ubuntu/todo-app
 
             echo "Pull latest code..."
             git pull --ff-only origin master
