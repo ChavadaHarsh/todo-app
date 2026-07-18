@@ -22,9 +22,13 @@
 
 # misc
 .DS_Store
+
+# SSH keys and deployment credentials
 *.pem
-github-actions-ec2
-github-actions-ec2.pub
+*.key
+*.pub
+/github-actions-ec2
+/github-actions-ec2.pub
 
 # debug
 npm-debug.log*
