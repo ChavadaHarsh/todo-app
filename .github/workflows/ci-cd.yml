@@ -47,7 +47,7 @@ jobs:
             set -euo pipefail
 
             TARGET_DIR="/home/ubuntu/todo-app"
-            REPO_URL="https://github.com/${GITHUB_REPOSITORY}.git"
+            REPO_URL="https://github.com/https://github.com/ChavadaHarsh/todo-app.git"
             BRANCH="master"
 
             echo "Ensure target directory exists..."
