@@ -4,23 +4,30 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:
 
 jobs:
-  ci:
-    name: Lint, Build & Deploy
+  build-and-deploy:
+    name: Build and Deploy
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repository
+      - name: Checkout Repository
         uses: actions/checkout@v5
 
-      - name: Install dependencies
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Dependencies
         run: npm ci
 
-      - name: Run lint
+      - name: Run Lint
         run: npm run lint
 
-      - name: Build application
+      - name: Build Application
         run: npm run build
 
       - name: Deploy to EC2
@@ -29,18 +36,28 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          port: ${{ secrets.EC2_PORT }}
+          port: 22
           script: |
             set -e
 
-            cd /home/ubuntu/app/todo-app
+            cd /home/ubuntu/todo-app
 
+            echo "Pull latest code..."
             git pull origin master
 
+            echo "Install dependencies..."
             npm ci
 
+            echo "Build application..."
             npm run build
 
-            pm2 restart todo-app || pm2 start npm --name "todo-app" -- start
+            echo "Restart PM2..."
+            if pm2 describe todo-app > /dev/null; then
+              pm2 restart todo-app
+            else
+              pm2 start npm --name "todo-app" -- start
+            fi
 
             pm2 save
+
+            echo "Deployment completed successfully."
