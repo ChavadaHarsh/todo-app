@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Todo-App",
-  description: "Todo list app with persisted localStorage tasks.",
+  description: "Todo list app with persisted localStorage task.",
   icons: {
     icon: "/icon.svg",
     shortcut: "/icon.svg",
