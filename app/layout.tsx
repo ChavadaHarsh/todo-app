@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Todo-App",
+  title: "TodoApp",
   description: "Todo list app with persisted localStorage task.",
   icons: {
     icon: "/icon.svg",

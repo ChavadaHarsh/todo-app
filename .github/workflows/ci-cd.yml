@@ -30,6 +30,10 @@ jobs:
             rm -rf .next
             npm run build 
 
-            pm2 reload todo-app
+            if pm2 describe todo-app > /dev/null; then
+              pm2 restart todo-app
+            else
+              pm2 start npm --name "todo-app" -- start
+            fi
 
             pm2 save
