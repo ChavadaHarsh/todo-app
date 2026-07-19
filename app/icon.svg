@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title>Todo list icon</title>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1f7a5c" />
+      <stop offset="100%" stop-color="#173328" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="18" fill="url(#bg)" />
+  <rect x="14" y="14" width="36" height="36" rx="10" fill="#f7fbf8" />
+  <circle cx="23" cy="25" r="3" fill="#1f7a5c" />
+  <path
+    d="M21.8 25.2l1.4 1.5 3.1-3.3"
+    fill="none"
+    stroke="#f7fbf8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="1.8"
+  />
+  <rect x="29" y="23" width="14" height="3" rx="1.5" fill="#173328" />
+  <circle cx="23" cy="33" r="3" fill="#1f7a5c" />
+  <path
+    d="M21.8 33.2l1.4 1.5 3.1-3.3"
+    fill="none"
+    stroke="#f7fbf8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="1.8"
+  />
+  <rect x="29" y="31" width="11" height="3" rx="1.5" fill="#173328" />
+  <circle cx="23" cy="41" r="3" fill="#c96b3b" />
+  <rect x="29" y="39" width="13" height="3" rx="1.5" fill="#173328" opacity="0.72" />
+</svg>
