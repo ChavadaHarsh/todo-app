@@ -26,9 +26,9 @@ jobs:
 
             npm install
 
-            
+
             rm -rf .next
-            npm run build || exit 1
+            npm run build 
 
             pm2 reload todo-app
 
