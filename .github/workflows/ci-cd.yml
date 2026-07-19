@@ -21,8 +21,15 @@ jobs:
           script: |
             git config --global --add safe.directory /home/ubuntu/app/todo-app
             cd /home/ubuntu/app/todo-app
+
             git pull origin master
+
             npm install
-            npm run build
-            pm2 restart todo-app
-            sudo systemctl restart nginx
+
+            
+            rm -rf .next
+            npm run build || exit 1
+
+            pm2 reload todo-app
+
+            pm2 save
