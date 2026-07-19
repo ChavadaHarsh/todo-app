@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import type { DragEvent } from "react";
 import { FiCheck, FiEdit3, FiTrash2 } from "react-icons/fi";
@@ -9,8 +10,6 @@ import type { TodoItem } from "../_types/todo";
 
 type TodoListProps = {
   todos: TodoItem[];
-  editingTodoId: string | null;
-  onEdit: (todo: TodoItem) => void;
   onDelete: (todoId: string) => void;
   onToggleCompleted: (todoId: string) => void;
   onReorder: (activeTodoId: string, targetTodoId: string) => void;
@@ -18,8 +17,6 @@ type TodoListProps = {
 
 export function TodoList({
   todos,
-  editingTodoId,
-  onEdit,
   onDelete,
   onToggleCompleted,
   onReorder,
@@ -150,22 +147,13 @@ export function TodoList({
                       ID: {todo.id.slice(0, 8)}
                     </span>
                     <div className="flex items-center gap-2 rounded-full border border-zinc-200 bg-white p-1 shadow-sm">
-                      <button
-                        type="button"
-                        onClick={() => onEdit(todo)}
-                        className={`inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full transition ${
-                          editingTodoId === todo.id
-                            ? "bg-[#173328] text-white"
-                            : "text-zinc-600 hover:bg-zinc-100 hover:text-[#173328]"
-                        }`}
-                        aria-label={
-                          editingTodoId === todo.id
-                            ? `Editing ${todo.name}`
-                            : `Edit ${todo.name}`
-                        }
+                      <Link
+                        href={`/todo/${todo.id}/edit`}
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-full text-zinc-600 transition hover:bg-zinc-100 hover:text-[#173328]"
+                        aria-label={`Edit ${todo.name}`}
                       >
                         <FiEdit3 className="text-base" />
-                      </button>
+                      </Link>
                       <button
                         type="button"
                         onClick={() => onDelete(todo.id)}
