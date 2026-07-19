@@ -4,91 +4,23 @@ on:
   push:
     branches:
       - master
-  create:        # runs when branches or tags are created
-  workflow_dispatch:
-  schedule:      # runs daily at 02:00 UTC (adjust cron as needed)
-    - cron: '0 2 * * *'
 
 jobs:
-  build-and-deploy:
-    name: Build and Deploy
+  deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 60    # avoid premature timeouts
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          fetch-depth: 0    # ensure full history so remote operations work
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Run Lint
-        run: npm run lint
-
-      - name: Build Application
-        run: npm run build
-
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.2.2
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
+          host: ${{ secrets.SSH_HOST }}
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY }}
           script: |
-            set -euo pipefail
-
-            TARGET_DIR="/home/ubuntu/todo-app"
-            REPO_URL="https://github.com/https://github.com/ChavadaHarsh/todo-app.git"
-            BRANCH="master"
-
-            echo "Ensure target directory exists..."
-            if [ ! -d "$TARGET_DIR" ]; then
-              echo "Target dir $TARGET_DIR does not exist. Cloning repository..."
-              git clone --branch "$BRANCH" "$REPO_URL" "$TARGET_DIR"
-            fi
-
-            cd "$TARGET_DIR"
-
-            # Ensure origin exists and fetch latest
-            if ! git remote | grep -q origin; then
-              git remote add origin "$REPO_URL"
-            fi
-
-            echo "Fetch latest from origin..."
-            git fetch origin --prune
-
-            # Try to checkout branch and reset to remote branch to avoid merge conflicts
-            if git show-ref --verify --quiet "refs/heads/$BRANCH"; then
-              git checkout "$BRANCH"
-            else
-              git checkout -b "$BRANCH" "origin/$BRANCH" || git checkout -b "$BRANCH"
-            fi
-
-            echo "Reset local branch to origin/$BRANCH"
-            git reset --hard "origin/$BRANCH"
-
-            echo "Install dependencies..."
-            npm ci
-
-            echo "Build application..."
+            cd /home/ubuntu/app/todo-app
+            git pull origin master
+            npm install
             npm run build
-
-            echo "Restart PM2..."
-            if pm2 describe todo-app > /dev/null 2>&1; then
-              pm2 restart todo-app
-            else
-              pm2 start npm --name "todo-app" -- start
-            fi
-
-            pm2 save
-
-            echo "Deployment completed successfully."
+            pm2 restart todo-app
