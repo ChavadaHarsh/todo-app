@@ -19,6 +19,8 @@ jobs:
           username: ubuntu
           key: ${{ secrets.SSH_KEY }}
           script: |
+            sudo chown -R ubuntu:ubuntu /home/ubuntu/app/todo-app
+            git config --global --add safe.directory /home/ubuntu/app/todo-app
             cd /home/ubuntu/app/todo-app
             git pull origin master
             npm install
